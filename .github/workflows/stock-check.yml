@@ -1,0 +1,21 @@
+name: iPhone Duo stock check
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 min (GitHub may delay runs under load)
+  workflow_dispatch:         # allows a manual "Run workflow" button
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check stock
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        # Script exits 1 when not in stock; "|| true" keeps those runs green.
+        run: python3 check_stock.py --ntfy "$NTFY_TOPIC" || true
